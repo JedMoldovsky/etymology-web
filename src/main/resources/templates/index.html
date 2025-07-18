@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Etymology Path Finder</title>
+</head>
+<body>
+    <h1>Etymology Path Finder</h1>
+    <form action="/find-path" method="post">
+        <label>Start Word: <input type="text" name="start" required></label><br><br>
+        <label>End Word: <input type="text" name="end" required></label><br><br>
+        <button type="submit">Find Path</button>
+    </form>
+
+    <div th:if="${path != null}">
+        <h2>Path from "<span th:text="${start}"></span>" to "<span th:text="${end}"></span>":</h2>
+        <ul>
+            <li th:each="word : ${path}" th:text="${word}"></li>
+        </ul>
+        <p th:if="${#lists.isEmpty(path)}">No path found.</p>
+    </div>
+</body>
+</html>

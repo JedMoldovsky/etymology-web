@@ -14,19 +14,12 @@ public class EtymologyController {
     public EtymologyController() {
         this.graph = new EtymologyGraph();
         try {
-            this.graph.loadFromResource("etymology.csv");  // no "src/main/resources" here
+            this.graph.loadFromResource("etymology.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Homepage message at /api
-    @GetMapping("/")
-    public String home() {
-        return "Welcome to the Etymology API! Use /api/path?start=word1&end=word2";
-    }
-
-    // Your existing path endpoint
     @GetMapping("/path")
     public List<String> getPath(@RequestParam String start, @RequestParam String end) {
         return graph.findShortestPath(start, end);
