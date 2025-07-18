@@ -16,6 +16,7 @@ public class WebController {
         this.graph = new EtymologyGraph();
         try {
             this.graph.loadFromResource("etymology.csv");
+             System.out.println("✅ Graph loaded with " + graph.getNodeCount() + " nodes.");
         } catch (IOException e) {
             e.printStackTrace();
         }

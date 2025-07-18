@@ -152,4 +152,11 @@ public class EtymologyGraph {
             System.err.println("Failed to read file: " + e.getMessage());
         }
     }
+    public int getNodeCount() {
+    return graph.size();
+}
+
+
+
+    
 }
