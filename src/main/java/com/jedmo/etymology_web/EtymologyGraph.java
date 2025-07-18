@@ -36,31 +36,30 @@ public class EtymologyGraph {
     }
 
     // Load CSV from classpath resource (e.g. src/main/resources/etymology.csv)
-    public void loadFromResource(String filename) throws IOException {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
-        if (inputStream == null) {
-            throw new FileNotFoundException("Resource not found: " + filename);
-        }
+   public void loadFromResource(String filename) throws IOException {
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
+    if (inputStream == null) {
+        throw new FileNotFoundException("Resource not found: " + filename);
+    }
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line = reader.readLine(); // skip header
-            while ((line = reader.readLine()) != null) {
-                String[] parts = splitCSVLine(line);
-                if (parts.length < 7) continue;
-
-                String lang = parts[1].trim();
-                String term = parts[2].trim().toLowerCase();
-                String relatedLang = parts[5].trim();
-                String relatedTerm = parts[6].trim().toLowerCase();
-
-                if ("English".equalsIgnoreCase(lang) && !term.isEmpty() && relatedTerm.length() > 0) {
-                    if ("English".equalsIgnoreCase(relatedLang) || relatedLang.isEmpty()) {
-                        addEdge(term, relatedTerm);
-                    }
-                }
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String line;
+        int count = 0;
+        while ((line = reader.readLine()) != null) {
+            count++;
+            System.out.println("Line " + count + ": " + line);
+            String[] parts = line.split(",");
+            if (parts.length >= 2) {
+                String from = parts[0].trim();
+                String to = parts[1].trim();
+                addEdge(from, to);
             }
         }
+        System.out.println("Total lines read from resource: " + count);
+        System.out.println("Total nodes in graph after loading: " + graph.size());
     }
+}
+
 
     private String[] splitCSVLine(String line) {
         List<String> tokens = new ArrayList<>();
