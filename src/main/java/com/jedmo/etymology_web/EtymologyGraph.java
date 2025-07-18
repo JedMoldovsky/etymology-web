@@ -1,8 +1,6 @@
 package com.jedmo.etymology_web;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,13 +9,17 @@ import java.util.*;
 public class EtymologyGraph {
     private Map<String, Set<String>> graph = new HashMap<>();
 
-    // Load CSV from a filesystem path (not classpath resource)
-    public void loadFromCSV(String filepath) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
-            br.readLine(); // skip header line
+    // Load CSV from classpath resource (e.g. src/main/resources/etymology.csv)
+    public void loadFromResource(String filename) throws IOException {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
+        if (inputStream == null) {
+            throw new IOException("Resource not found: " + filename);
+        }
 
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            reader.readLine(); // skip header line
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 String[] parts = splitCSVLine(line);
                 if (parts.length < 7) continue;
 
@@ -34,32 +36,6 @@ public class EtymologyGraph {
             }
         }
     }
-
-    // Load CSV from classpath resource (e.g. src/main/resources/etymology.csv)
-   public void loadFromResource(String filename) throws IOException {
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
-    if (inputStream == null) {
-        throw new FileNotFoundException("Resource not found: " + filename);
-    }
-
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String line;
-        int count = 0;
-        while ((line = reader.readLine()) != null) {
-            count++;
-            System.out.println("Line " + count + ": " + line);
-            String[] parts = line.split(",");
-            if (parts.length >= 2) {
-                String from = parts[0].trim();
-                String to = parts[1].trim();
-                addEdge(from, to);
-            }
-        }
-        System.out.println("Total lines read from resource: " + count);
-        System.out.println("Total nodes in graph after loading: " + graph.size());
-    }
-}
-
 
     private String[] splitCSVLine(String line) {
         List<String> tokens = new ArrayList<>();
@@ -127,19 +103,18 @@ public class EtymologyGraph {
     }
 
     public static void main(String[] args) {
-        if (args.length < 3) {
-            System.out.println("Usage: java com.jedmo.etymology_web.EtymologyGraph <csv_file_path> <word1> <word2>");
+        if (args.length < 2) {
+            System.out.println("Usage: java com.jedmo.etymology_web.EtymologyGraph <word1> <word2>");
             return;
         }
 
-        String filename = args[0];
-        String word1 = args[1];
-        String word2 = args[2];
+        String word1 = args[0];
+        String word2 = args[1];
 
         EtymologyGraph graph = new EtymologyGraph();
         try {
-            System.out.println("Loading data...");
-            graph.loadFromCSV(filename);
+            System.out.println("Loading data from resource...");
+            graph.loadFromResource("etymology.csv"); // CSV must be in src/main/resources
             System.out.println("Data loaded.");
 
             List<String> path = graph.findShortestPath(word1, word2);
@@ -148,7 +123,7 @@ public class EtymologyGraph {
                 System.out.println(String.join(" -> ", path));
             }
         } catch (IOException e) {
-            System.err.println("Failed to read file: " + e.getMessage());
+            System.err.println("Failed to load data: " + e.getMessage());
         }
     }
 
