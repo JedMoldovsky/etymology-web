@@ -1,6 +1,7 @@
 package com.jedmo.etymology_web;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,16 +36,15 @@ public class EtymologyGraph {
     }
 
     // Load CSV from classpath resource (e.g. src/main/resources/etymology.csv)
-    public void loadFromResource(String resourceName) throws IOException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName);
-        if (is == null) {
-            throw new IOException("Resource not found: " + resourceName);
+    public void loadFromResource(String filename) throws IOException {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
+        if (inputStream == null) {
+            throw new FileNotFoundException("Resource not found: " + filename);
         }
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-            br.readLine(); // skip header line
 
-            String line;
-            while ((line = br.readLine()) != null) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line = reader.readLine(); // skip header
+            while ((line = reader.readLine()) != null) {
                 String[] parts = splitCSVLine(line);
                 if (parts.length < 7) continue;
 
@@ -152,11 +152,8 @@ public class EtymologyGraph {
             System.err.println("Failed to read file: " + e.getMessage());
         }
     }
+
     public int getNodeCount() {
-    return graph.size();
-}
-
-
-
-    
+        return graph.size();
+    }
 }
